@@ -1,0 +1,120 @@
+This is my HVAC home automation program.
+
+Background on my house:
+
+My house is a rural farmhouse in the midwest of the US.  As a farm house it was built
+and added on to many times over the past 120 years.  So insulation varies, building
+techniques vary, etc.
+
+The heating system is a natural gas fired boiler, with three zones of base board
+radiators (think 1980's aluminum fin style).
+
+Being in the midwest, while rare, our winters can get as cold as -20F (or colder).
+The house and heating system struggle with temperatures that cold and I ususually
+need to use a supplimental portable plug-in electric heater.
+
+Since it's a radiant heat system, there is no central air -- and thus no central
+air conditioning.  This means I need to rely on a series of window air conditioners
+in the summer time for cooling.  Again in the midwest we can get to temperatures that
+exceed 90F with humidity at 90%+.
+
+
+Thermostat control:
+
+The Nest thermostats do a wonderful job controlling the ups/downs of radiant heating.
+However, on the coldest days they can't cope with the overall heat loss of the house
+so everything runs continuously and the house can get colder then I'd like.
+
+On these days I use a plug in space heater, however if I don't regulate it
+perfectly, I end up using more electricity then necessary raising my electrical
+bill.  (Natural gas heating is far cheaper for me.)
+
+I want a way for the Nest to call for supplemental heat, which can be as simple
+as turning on an IFTTT enabled WiFi plug-in switch.  This will allow the Nest to
+make a more efficient choice concerning both comfort and cost.
+
+
+In the summer with the window air conditioners, I can cool my house with one
+air conditioner per zone, roughly equivalent to where the thermostats are placed.
+However, they are noisy and either the fan has to run all the time, or I have to
+deal with the 'eco' mode where the fan is off -- but the temps swing wildly in
+the house.
+
+I was finally able to find some WiFi / IFTTT enabled window air conditioners
+(more on that below).  So I need a way to sync up the Nest to control the
+air conditioners in a way that is both comfortable, and keeps some of the fan
+noise and power usage to a minimum.
+
+
+Hardware involved:
+
+* Boiler (180F set) & pump - 24 VAC driven
+* 3-Zone Control Valves    - 24 VAC driven
+* 3-Nest Gen 1 thermostats - 24 VAC driven
+* Numato 8-port GPIO USB board (GND to GPIO driven)
+* 8-port 24VAC Relay board
+* IFTTT enabled plugs
+* GE (Haier) Window Air Conditioners, IFTTT enabled
+
+
+With this integration, the Nest thermostats can drive the 24 VAC relays.
+The relays can then drive the GPIO lines, and the GPIO can be used to
+determine what the nest is calling for.  Fan, Heating, Air Conditioning,
+Humidity, Dehumidification, etc....
+
+Along with that, Nest makes a 'Works with Nest' developer API available.
+This API appears to be available for both hobbyists, as well as commercial
+developers and provides the opportunity to read more then just the on/off
+that would be available from the GPIO board alone.
+
+
+Air Conditioning theory:
+
+The GE air conditioners are actually pretty 'smart'.  In cooling mode they
+will simply cool until they reach the set temp.  However, in eco mode they
+will cool to the set temp, and keep the fan running just long enough to
+use the cooling capacity left in the condensor.  Using this principal with
+the Nest thermostats you can end up doing something like:
+
+1) Wait for the GPIO to signal cooling.
+
+2) Read the desired temp from the Nest.
+
+3) Set the mode to 'cool', set the temp UNDER the desired temp.  (I think -2F
+makes sense.)
+
+4) Once the Nest says cooling is complete, switch the mode to Eco, and set
+the temp OVER the desired temp.  (I think +2F makes sense here.)
+
+
+The idea with this is if in case of a power outtage, IFTTT outtage or other
+things going wrong.. a reasonable base temp will still be available in case
+it is needed.
+
+
+Heating theory:
+
+Using a simple on/off plug heater, with the portable space heater set to a
+reasonable max temp should be fine.
+
+It may be necessary to occasionally check the temp in the house for a sign
+that it's 'too warm' and send the power off signal in case it was missed
+previously.
+
+
+Program theory:
+
+The GPIO, Nest API, and IFTTT work will each be in their own worker threads.
+They are each repsonsible for getting or sending the data, and retrying in
+case of failures.
+
+A thread for each 'zone' in the house will also be present.  This thread
+will be contacted via events when the GPIO or Nest API changes.
+(Presumably if I want integration with IFTTT, I could add an event for
+that as well.)
+
+So all of the control algorithms will be local to the zones, and all of the
+data I/O will be local to the workers.
+
+June 19, 2018
+--Mark
