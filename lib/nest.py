@@ -88,7 +88,7 @@ class Nest():
                 response = http.request('GET', request_url, headers=headers, preload_content=False, retries=False)
 
                 if response.status == 307:
-                    print response.get_redirect_location()
+                    print("Nest API redirect: %s" % response.get_redirect_location())
                     request_url = response.get_redirect_location()
                     continue
 
