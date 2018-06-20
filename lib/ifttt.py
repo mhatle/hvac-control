@@ -47,19 +47,18 @@ class IFTTT():
     # wait for a confirmation (via the named pipe/fifo)
     def send_action(self, action, retry=0):
         def _http_request(action):
-            try:
-                res = urllib2.urlopen(urllib2.Request(self.ifttt_url % (action)))
-                print("result: %s" % res.read())
-            except urllib2.HTTPError as e:
-                print("HTTP Error: %s: %s" % (e.code, e.reason))
-                print(" Requested: %s" % (self.ifttt_url % (action)))
-                print(" Actual:    %s" % (e.geturl()))
-                sleep(5)
-                res = _http_request(action)
+            while True:
+                try:
+                    res = urllib2.urlopen(urllib2.Request(self.ifttt_url % (action)))
+                    print("result: %s" % res.read())
+                    break
+                except urllib2.HTTPError as e:
+                    print("HTTP Error: %s: %s" % (e.code, e.reason))
+                    print(" Requested: %s" % (self.ifttt_url % (action)))
+                    print(" Actual:    %s" % (e.geturl()))
+                    sleep(5)
 
             return res
-
-
 
         print("Sending ifttt %s" % action)
 
