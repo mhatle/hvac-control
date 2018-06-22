@@ -79,7 +79,7 @@ class IFTTT():
                 self.lock.release()
         sleep(1)
 
-    def run(self, wait_time=1, pipe_name='/var/www/cgi-bin/hvac-fifo'):
+    def run(self, wait_time=10, pipe_name='/var/www/cgi-bin/hvac-fifo'):
         if not os.path.exists(pipe_name):
             raise Exception('no fifo: %s' % pipe_name)
 
