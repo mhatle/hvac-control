@@ -46,4 +46,4 @@ class LivingRoom(Zone):
         self.therm_name  = "Family Room Thermostat (Living Room)" # Nest name_long
 
         # GPIO specific settings
-        self.gpio_cool    = 0x10
+        self.gpio_cool    = 1 << 4
