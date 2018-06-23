@@ -130,6 +130,8 @@ class Gpio():
             gpio = self.poll_gpio()
             if gpio != last_gpio:
                 try:
+                    #print("D: GPIO: %s" % gpio)
+                    #print("D: GPIO: {0:08b}".format(gpio))
                     self.lock.acquire()
 
                     self.gpio = gpio
