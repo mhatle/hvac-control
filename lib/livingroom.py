@@ -36,8 +36,9 @@ class LivingRoom(Zone):
         self.ifttt_cooling_temp = ( "livingroom_ac_set_%s", 0 )
 
         # Current Living Room settings
+        # GE (Haier) AEC10AX 10,000BTU 120V
         self.ac_min      = 64
-        self.ac_max      = 80
+        self.ac_max      = 86
         self.ac_temp_default = 70  # Default temp if no info from the thermostat
         self.ac_cooling_on_offset  = -2 # When cooling drop temp by N degrees
         self.ac_cooling_off_offset =  2 # When NOT cooling raise temp by N degrees
@@ -46,4 +47,4 @@ class LivingRoom(Zone):
         self.therm_name  = "Family Room Thermostat (Living Room)" # Nest name_long
 
         # GPIO specific settings
-        self.gpio_cool    = 1 << 4
+        self.gpio_cool    = 1 << 0
