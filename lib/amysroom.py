@@ -1,6 +1,6 @@
 # Individual device configuration: Amy's Room
 #
-# This drives the models/algorithms to manage my livingroom
+# This drives the models/algorithms to manage my Amy's Bedroom
 #
 # Written by Mark Hatle <mark@hatle.net>
 # Copyright (C) 2018 Mark Hatle
