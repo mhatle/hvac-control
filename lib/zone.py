@@ -58,7 +58,7 @@ class Zone():
         self.ifttt_heating_temp = None
 
         # Current zone settings
-        self.fan_on      = None  # Is the fan on or off?
+        self.fan_on       = None  # Is the fan on or off?
 
         self.heat_on      = None  # Is the heater on or off?
         self.heating_on   = None  # Are we currenting heating?
@@ -101,6 +101,16 @@ class Zone():
         if args:
             action = action % (args)
         self.ifttt.send_action(action, retry)
+
+    def turn_on_fan(self):
+        if self.has_fan and self.fan_on != True:
+            self._action(self.ifttt_fan_on)
+            self.fan_on = True
+
+    def turn_off_fan(self):
+        if self.has_fan and self.fan_on != False:
+            self._action(self.ifttt_fan_off)
+            self.fan_on = False
 
     def turn_on_heat(self):
         if self.has_heat and self.heat_on != True:
