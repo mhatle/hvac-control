@@ -52,6 +52,7 @@ class MarksRoom(Zone):
         self.ac_temp_default = 70  # Default temp if no info from the thermostat
         self.ac_cooling_on_offset  = -3 # When cooling drop temp by N degrees
         self.ac_cooling_off_offset =  2 # When NOT cooling raise temp by N degrees
+        self.ac_cooling_fan = None
 
         # Nest specific settings
         self.therm_name  = "Mark's Bedroom Thermostat (Upstairs)" # Long Name
@@ -63,16 +64,28 @@ class MarksRoom(Zone):
     # At night we want the fan to stay on low, faster the fan the louder it
     # is.  I just wish there was a way to turn off the 'beep' when it changes
     # modes and/or temps.
+    def cooling_fan_speed(self, mode):
+        if self.ac_cooling_fan != mode:
+            self.ac_cooling_fan = mode
+            if mode == "low":
+                self._action(self.ifttt_cooling_fan_low)
+            elif mode == "med":
+                self._action(self.ifttt_cooling_fan_med)
+            elif mode == "high":
+                self._action(self.ifttt_cooling_fan_high)
+            else:
+                self._action(self.ifttt_cooling_fan_auto)
+
     def turn_on_cooling(self):
         Zone.turn_on_cooling(self)
         if self.ac_cooling == True:
             hour = datetime.datetime.now()
             if hour.hour >= 22 or hour.hour < 8:    # 10pm to 8am
-                self._action(self.ifttt_cooling_fan_low)
+                self.cooling_fan_speed('low')
             elif hour.hour >= 10 and hour.hour < 18: # 10am to 6pm
-                self._action(self.ifttt_cooling_fan_high)
+                self.cooling_fan_speed('high')
             else:                                # 8am to 10am and 6pm to 10pm
-                self._action(self.ifttt_cooling_fan_auto)
+                self.cooling_fan_speed('auto')
 
     def turn_off_cooling(self):
         Zone.turn_off_cooling(self)
@@ -80,6 +93,7 @@ class MarksRoom(Zone):
             hour = datetime.datetime.now()
             # If it's between 10pm and 8am, set the fan to -low-
             if hour.hour >= 22 or hour.hour < 8:    # 10pm to 8am
-                self._action(self.ifttt_cooling_fan_low)
+                self.cooling_fan_speed('low')
             else:
-                self._action(self.ifttt_cooling_fan_auto)
+                self.cooling_fan_speed('auto')
+
