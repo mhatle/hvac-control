@@ -267,7 +267,12 @@ class Zone():
 
         # Note in heat-cool mode the temps are managed differently
         # not yet implemented...
-        self.set_nest_temp(thermostat['target_temperature_f'])
+    
+        # For now we just track the 'high' temp, which is cooling...
+        if self.therm_mode == "heat-cool" or self.therm_mode == "eco":
+            self.set_nest_temp(thermostat['target_temperature_high_f'])
+        else:
+            self.set_nest_temp(thermostat['target_temperature_f'])
 
     def set_nest_has_fan(self, fan):
         if self.has_fan != fan:
@@ -292,7 +297,7 @@ class Zone():
             elif mode == "cool":
                 self.turn_on_ac()
                 self.turn_off_heat()
-            elif mode == "heat-cool":
+            elif mode == "heat-cool" or mode == "eco":
                 print("Warning: heat-cool mode not implemented!")
                 self.turn_on_ac()
                 self.turn_on_heat()
