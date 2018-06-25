@@ -57,6 +57,9 @@ class IFTTT():
                     print(" Requested: %s" % (self.ifttt_url % (action)))
                     print(" Actual:    %s" % (e.geturl()))
                     sleep(5)
+                except urllib2.URLError as e:
+                    print('URLError: %s %s' % (self.ifttt_url % (action), e))
+                    sleep(5)
 
             return res
 
