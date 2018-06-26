@@ -55,7 +55,7 @@ class MarksRoom(Zone):
         self.ac_cooling_fan = None
 
         # Nest specific settings
-        self.therm_name  = "Mark's Bedroom Thermostat (Upstairs)" # Long Name
+        self.therm_name  = "Master Bedroom Thermostat (Mark's Bedroom)" # Long Name
 
         # GPIO specific settings
         self.gpio_cool    = 1 << 4
