@@ -220,7 +220,7 @@ class Zone():
             self._action(self.ifttt_fan_on)
             self.fan_on = True
 
-    def turn_off_ac(self):
+    def turn_off_fan(self):
         if self.has_fan and self.fan_on != False:
             self._action(self.ifttt_fan_off)
             self.fan_on = False
@@ -236,6 +236,12 @@ class Zone():
             if thermostat['name_long'] == self.therm_name:
                 self.therm_id = id
                 break
+
+        if not self.therm_id:
+            msg = "Thermostat %s not found!\nAvailable thermostats:\n" % (self.therm_name)
+            for id in thermostats:
+                msg += "  %s\n" % (thermostats[id]['name_long'])
+            print(msg)
 
         return self.therm_id
 
