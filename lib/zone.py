@@ -253,17 +253,6 @@ class Zone():
 
         thermostat = thermostats[self.therm_id]
 
-        status = thermostat['hvac_mode']
-        if status != 'off':
-            if thermostat['hvac_state'] != 'off':
-                status = '%s (%sm) to %s' % (thermostat['hvac_state'], thermostat['time_to_target'], thermostat['target_temperature_f'])
-            else:
-                status = '%s to %s' % (thermostat['hvac_mode'], thermostat['target_temperature_f'])
-
-        print("%s: %s (current %sF %s%%)" % (thermostat['name'], status,
-                 thermostat['ambient_temperature_f'],
-                 thermostat['humidity']))
-
         self.set_nest_has_fan(thermostat['has_fan'])
         self.set_nest_has_cool(thermostat['can_cool'])
         self.set_nest_has_heat(thermostat['can_heat'])
@@ -279,6 +268,17 @@ class Zone():
             self.set_nest_temp(thermostat['target_temperature_high_f'])
         else:
             self.set_nest_temp(thermostat['target_temperature_f'])
+
+        status = self.therm_mode
+        if status != 'off':
+            if self.therm_state != 'off':
+                status = '%s (%sm) to %s' % (self.therm_state, thermostat['time_to_target'], self.therm_temp)
+            else:
+                status = '%s to %s' % (self.therm_mode, self.therm_temp)
+
+        print("%s: %s (current %sF %s%%)" % (self.therm_name, status,
+                 thermostat['ambient_temperature_f'],
+                 thermostat['humidity']))
 
     def set_nest_has_fan(self, fan):
         if self.has_fan != fan:
