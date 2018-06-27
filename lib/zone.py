@@ -28,11 +28,14 @@ import gpio
 import ifttt
 import threading
 from time import sleep
+import logging
 
 class Zone():
     # The class that uses this MUST set has_heat, has_cool, has_fan
     # ifttt_* actions, and therm_name
     def __init__(self, nest=None, gpio=None, ifttt=None):
+        self.logger = logging.getLogger('HVAC.Zone')
+
         self.nest        = nest
         self.gpio        = gpio
         self.ifttt       = ifttt
@@ -228,7 +231,7 @@ class Zone():
 
     def init_nest(self, thermostats):
         if not self.therm_name:
-            raise Exception("No thermostat long_name defined!")
+            raise Exception("No thermostat 'name_long' (self.therm_name) defined!")
 
         for id in thermostats:
             thermostat = thermostats[id]
@@ -241,14 +244,14 @@ class Zone():
             msg = "Thermostat %s not found!\nAvailable thermostats:\n" % (self.therm_name)
             for id in thermostats:
                 msg += "  %s\n" % (thermostats[id]['name_long'])
-            print(msg)
+            self.logger.error(msg)
 
         return self.therm_id
 
     def update_nest(self, thermostats):
         if not self.therm_id:
             if not self.init_nest(thermostats):
-                print("Thermostat not found for %s!" % self.therm_name)
+                self.logger.error("Thermostat not found for %s!" % self.therm_name)
                 return
 
         thermostat = thermostats[self.therm_id]
@@ -276,7 +279,7 @@ class Zone():
             else:
                 status = '%s to %s' % (self.therm_mode, self.therm_temp)
 
-        print("%s: %s (current %sF %s%%)" % (self.therm_name, status,
+        self.logger.info("%s: %s (current %sF %s%%)" % (self.therm_name, status,
                  thermostat['ambient_temperature_f'],
                  thermostat['humidity']))
 
@@ -304,7 +307,7 @@ class Zone():
                 self.turn_on_ac()
                 self.turn_off_heat()
             elif mode == "heat-cool" or mode == "eco":
-                print("Warning: heat-cool mode not implemented!")
+                self.logger.warning("eco/heat-cool mode not implemented!")
                 self.turn_on_ac()
                 self.turn_on_heat()
             else:

@@ -25,9 +25,12 @@
 import serial
 from time import sleep
 import threading
+import logging
 
 class Gpio():
     def __init__(self, serial_port):
+        self.logger = logging.getLogger('HVAC.GPIO')
+
         self.lock = threading.Lock()   # Thread lock for the data
 
         try:
@@ -61,7 +64,7 @@ class Gpio():
     def getGpio(self):
         try:
             self.lock.acquire()
-            #print("D: raw gpio  %s" % self.gpio)
+            #self.logger.debug("raw gpio  %s" % self.gpio)
             if self.gpio:
                 return int(self.gpio)
             else:
@@ -73,7 +76,7 @@ class Gpio():
 
     def poll_gpio(self):
         def _gpio_write(output):
-            #print('D: "%s" --> gpio' % output)
+            #self.logger.debug('"%s" --> gpio' % output)
             self.gpio_fd.write(output + '\n')
             # Give the device time to respond
             sleep(.1)
@@ -82,7 +85,7 @@ class Gpio():
             buffer = ""
             while True:
                 input = self.gpio_fd.read()
-                #print('D: "%s" <-- gpio' % input)
+                #self.logger.debug('"%s" <-- gpio' % input)
                 if not input:
                     break
                 buffer += input
@@ -109,7 +112,7 @@ class Gpio():
             if not prompt:
                 raise exception("Input did not end with prompt")
 
-            #print('line: "%s"' % lines)
+            #self.logger.debug('line: "%s"' % lines)
             return lines
 
         if self.init:
@@ -119,7 +122,7 @@ class Gpio():
         lines = _write_read_gpio('gpio readall')
         if len(lines) > 1:
             # Got unexpected data
-            print("Warning got more then one line of data: %s" % lines)
+            self.logger.warning("Got more then one line of data: %s" % lines)
 
         return int(lines[0], 16)
 
@@ -130,8 +133,8 @@ class Gpio():
             gpio = self.poll_gpio()
             if gpio != last_gpio:
                 try:
-                    #print("D: GPIO: %s" % gpio)
-                    #print("D: GPIO: {0:08b}".format(gpio))
+                    #self.logger.debug("GPIO: %s" % gpio)
+                    self.logger.debug("GPIO: {0:08b}".format(gpio))
                     self.lock.acquire()
 
                     self.gpio = gpio

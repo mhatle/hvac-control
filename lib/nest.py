@@ -30,9 +30,12 @@
 import json
 import copy
 import threading
+import logging
 
 class Nest():
     def __init__(self, token, url='https://developer-api.nest.com'):
+        self.logger = logging.getLogger('HVAC.Nest')
+
         self.lock = threading.Lock()     # Thread lock for the data
 
         try:
@@ -88,7 +91,7 @@ class Nest():
                 response = http.request('GET', request_url, headers=headers, preload_content=False, retries=False)
 
                 if response.status == 307:
-                    print("Nest API redirect: %s" % response.get_redirect_location())
+                    self.logger.info("Nest API redirect: %s" % response.get_redirect_location())
                     request_url = response.get_redirect_location()
                     continue
 
@@ -108,13 +111,13 @@ class Nest():
             elif event_type == 'put':
                 yield event.data
             elif event_type == 'keep-alive':
-                #print "No data updates. Receiving an HTTP header to keep the conne$
+                self.logger.debug("No data updates. Receiving an HTTP header to keep the connection alive.")
                 pass
             elif event_type == 'auth_revoked' or event_type == 'cancel' :
-                print "revoked token: ", event
+                self.logger.warn("revoked token: %s" % event)
                 yield '%s' %  json.dumps(err.result)
             elif event_type == 'error':
-                print "error message: ", event.data # check if contains error code
+                self.logger.error("error message: %s" % event.data) # check if contains error code
                 yield '%s' %  json.dumps({"error": event.data})
             else:
                 raise exception("Unknown event, no handler for it.")
@@ -140,7 +143,7 @@ class Nest():
 
             # We only process thermostats
             if not ('devices' in data and 'thermostats' in data['devices']):
-                print("Invalid data: %s" % data)
+                self.logger.error("No devices or thermostats in devices: %s" % data)
                 return
 
             for id in data['devices']['thermostats']:
@@ -150,6 +153,7 @@ class Nest():
                     self.thermostats[id] = {}
                     self.updated[id] = 0
 
+                updated_items = ""
                 for element in thermostat:
                     if element not in self.thermostats[id] or \
                        self.thermostats[id][element] != thermostat[element]:
@@ -157,8 +161,16 @@ class Nest():
 
                         # We only care about fields changing, not the connection time
                         if element != "last_connection":
+                            updated_items += " { '%s':'%s' }" % (element, thermostat[element])
                             self.updated[id] += 1
                             updated = True
+
+                if updated_items:
+                    name = id
+                    if 'name_long' in thermostat:
+                        name = thermostat['name_long']
+
+                    self.logger.debug("%s updated%s" % (name, updated_items))
         finally:
             self.lock.release()
             if updated:

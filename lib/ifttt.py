@@ -28,9 +28,12 @@ from time import sleep
 import threading
 import os
 import stat
+import logging
 
 class IFTTT():
     def __init__(self, token):
+        self.logger = logging.getLogger('HVAC.IFTTT')
+
         self.lock = threading.Lock()
 
         try:
@@ -50,20 +53,20 @@ class IFTTT():
             while True:
                 try:
                     res = urllib2.urlopen(urllib2.Request(self.ifttt_url % (action)))
-                    print("result: %s" % res.read())
+                    self.logger.debug("result: %s" % res.read())
                     break
                 except urllib2.HTTPError as e:
-                    print("HTTP Error: %s: %s" % (e.code, e.reason))
-                    print(" Requested: %s" % (self.ifttt_url % (action)))
-                    print(" Actual:    %s" % (e.geturl()))
+                    self.logger.error("HTTP Error: %s: %s" % (e.code, e.reason))
+                    self.logger.debug(" Requested: %s" % (self.ifttt_url % (action)))
+                    self.logger.debug(" Actual:    %s" % (e.geturl()))
                     sleep(5)
                 except urllib2.URLError as e:
-                    print('URLError: %s %s' % (self.ifttt_url % (action), e))
+                    self.logger.error('URLError: %s %s' % (self.ifttt_url % (action), e))
                     sleep(5)
 
             return res
 
-        print("Sending ifttt %s" % action)
+        self.logger.info("Sending ifttt %s" % action)
 
         try:
             self.lock.acquire()
@@ -93,7 +96,7 @@ class IFTTT():
                     if len(action) == 0:
                         break
 
-                    print("Clear action: %s" % action)
+                    self.logger.debug("Clear action: %s" % action)
                     try:
                         self.lock.acquire()
                         if action in self.ifttt_actions:
@@ -101,8 +104,8 @@ class IFTTT():
                     finally:
                         self.lock.release()
 
-            print("Action list:")
+            self.logger.debug("Action list:")
             for action in self.ifttt_actions:
-                print action
+                 self.logger.debug(action)
 
             sleep(wait_time)

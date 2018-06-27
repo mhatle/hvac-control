@@ -23,10 +23,13 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from zone import Zone
+import logging
 
 class AmysRoom(Zone):
     def __init__(self, nest=None, gpio=None, ifttt=None):
         Zone.__init__(self, nest=nest, gpio=gpio, ifttt=ifttt)
+
+        self.logger = logging.getLogger('HVAC.Zone.AmysRoom')
 
         # Nest specific settings
         self.therm_name  = "Amy's Bedroom Thermostat (Amy's Room)" # Long Name

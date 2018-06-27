@@ -1,2 +1,3 @@
 *.pyc
-/settings.py
+settings.py
+hvac.log

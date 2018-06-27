@@ -25,10 +25,13 @@
 from zone import Zone
 
 import datetime
+import logging
 
 class MarksRoom(Zone):
     def __init__(self, nest=None, gpio=None, ifttt=None):
         Zone.__init__(self, nest=nest, gpio=gpio, ifttt=ifttt)
+
+        self.logger = logging.getLogger('HVAC.Zone.MarksRoom')
 
         # ifff action and response retry value (0 = no wait for an activation, assume it worked)
         self.ifttt_cool_on      = ( "marksroom_ac_on", 0 )
