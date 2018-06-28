@@ -259,8 +259,6 @@ class Zone():
         self.set_nest_has_fan(thermostat['has_fan'])
         self.set_nest_has_cool(thermostat['can_cool'])
         self.set_nest_has_heat(thermostat['can_heat'])
-        self.set_nest_mode(thermostat['hvac_mode'])
-        self.set_nest_state(thermostat['hvac_state'])
         self.set_nest_ambient(thermostat['ambient_temperature_f'])
 
         # Note in heat-cool mode the temps are managed differently
@@ -271,6 +269,11 @@ class Zone():
             self.set_nest_temp(thermostat['target_temperature_high_f'])
         else:
             self.set_nest_temp(thermostat['target_temperature_f'])
+
+        # We need to set the mode -after- the temp, so on startup we don't end up sending
+        # it twice...
+        self.set_nest_mode(thermostat['hvac_mode'])
+        self.set_nest_state(thermostat['hvac_state'])
 
         status = self.therm_mode
         if status != 'off':
@@ -391,7 +394,7 @@ class Zone():
         self.nest.registerEvent(zone_event)
         self.nest.registerEvent(zone_nest)
 
-        # Give the system a change to start up and query
+        # Give the system a chance to start up and query
         sleep(5)
 
         # Start off by parsing everything
@@ -419,6 +422,10 @@ class Zone():
                     else:
                         last_updated = updated[self.therm_id]
                 self.update_nest(thermostats)
+
+            if not self.therm_id:
+                self.logger.debug("Waiting for Nest data to start up zone GPIO control...")
+                continue
 
             # Process the GPIO even if the NEST isn't ready
             # it will have to assume some basic info...
