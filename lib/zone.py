@@ -290,8 +290,8 @@ class Zone():
             self.has_cool = cool
 
     def set_nest_has_heat(self, heat):
-        if self.has_cool != heat:
-            self.has_cool = heat
+        if self.has_heat != heat:
+            self.has_heat = heat
 
     def set_nest_mode(self, mode):
         if self.therm_mode != mode:
