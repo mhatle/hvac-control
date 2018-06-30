@@ -30,6 +30,7 @@ from lib import nest
 from lib import gpio
 from lib import ifttt
 from lib import livingroom
+from lib import catroom
 from lib import marksroom
 from lib import amysroom
 
@@ -64,6 +65,7 @@ def main():
     ifttt_obj = ifttt.IFTTT(settings.IFTTT_TOKEN)
 
     livingroom_obj = livingroom.LivingRoom(nest_obj, gpio_obj, ifttt_obj)
+    catroom_obj = catroom.CatRoom(nest_obj, gpio_obj, ifttt_obj)
     amysroom_obj = amysroom.AmysRoom(nest_obj, gpio_obj, ifttt_obj)
     marksroom_obj = marksroom.MarksRoom(nest_obj, gpio_obj, ifttt_obj)
 
@@ -72,6 +74,7 @@ def main():
     ifttt_thread = threading.Thread(target=ifttt_obj.run)
 
     livingroom_thread = threading.Thread(target=livingroom_obj.run)
+    catroom_thread = threading.Thread(target=catroom_obj.run)
     amysroom_thread = threading.Thread(target=amysroom_obj.run)
     marksroom_thread = threading.Thread(target=marksroom_obj.run)
 
@@ -80,6 +83,7 @@ def main():
     nest_thread.daemon = True
     ifttt_thread.daemon = True
     livingroom_thread.daemon = True
+    catroom_thread.daemon = True
     amysroom_thread.daemon = True
     marksroom_thread.daemon = True
 
@@ -87,6 +91,7 @@ def main():
     nest_thread.start()
     ifttt_thread.start()
     livingroom_thread.start()
+    catroom_thread.start()
     amysroom_thread.start()
     marksroom_thread.start()
 

@@ -1,6 +1,9 @@
 # Individual device configuration: Livingroom
 #
-# This drives the models/algorithms to manage my livingroom
+# This drives the models/algorithms to manages the second stage
+# of the living room.  The room next door, the 'cat room', contains another
+# air conditioner and will be treated as 'stage two' for the living room
+# thermostat.  It only needs to come on if extra cooling is required.
 #
 # Written by Mark Hatle <mark@hatle.net>
 # Copyright (C) 2018 Mark Hatle
@@ -25,31 +28,31 @@
 from zone import Zone
 import logging
 
-class LivingRoom(Zone):
+class CatRoom(Zone):
     def __init__(self, nest=None, gpio=None, ifttt=None):
         Zone.__init__(self, nest=nest, gpio=gpio, ifttt=ifttt)
 
-        self.logger = logging.getLogger('HVAC.Zone.LivingRoom')
+        self.logger = logging.getLogger('HVAC.Zone.CatRoom')
 
-        self.display_name = "Living Room"
+        self.display_name = "Cat Room"
 
         # ifff action and response retry value (0 = no wait for an activation, assume it worked)
-        self.ifttt_cool_on      = ( "livingroom_ac_on", 0 )
-        self.ifttt_cool_off     = ( "livingroom_ac_off", 0 )
-        self.ifttt_cooling_on   = ( "livingroom_ac_cool", 30 )
-        self.ifttt_cooling_off  = ( "livingroom_ac_eco", 30 )
-        self.ifttt_cooling_temp = ( "livingroom_ac_set_%s", 0 )
+        self.ifttt_cool_on      = ( "catroom_ac_on", 0 )
+        self.ifttt_cool_off     = ( "catroom_ac_off", 0 )
+        self.ifttt_cooling_on   = ( "catroom_ac_cool", 30 )
+        self.ifttt_cooling_off  = ( "catroom_ac_eco", 30 )
+        self.ifttt_cooling_temp = ( "catroom_ac_set_%s", 0 )
 
         # Current Living Room settings
         # GE (Haier) AEC10AX 10,000BTU 120V
         self.ac_min      = 64
         self.ac_max      = 86
         self.ac_temp_default = 70  # Default temp if no info from the thermostat
-        self.ac_cooling_on_offset  = -2 # When cooling drop temp by N degrees
-        self.ac_cooling_off_offset =  2 # When NOT cooling raise temp by N degrees
+        self.ac_cooling_on_offset  = -4 # When cooling drop temp by N degrees
+        self.ac_cooling_off_offset =  4 # When NOT cooling raise temp by N degrees
 
         # Nest specific settings
         self.therm_name  = "Living Room Thermostat" # Nest name_long
 
         # GPIO specific settings
-        self.gpio_cool    = 1 << 0
+        self.gpio_cool    = 1 << 1
