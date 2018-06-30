@@ -31,5 +31,7 @@ class AmysRoom(Zone):
 
         self.logger = logging.getLogger('HVAC.Zone.AmysRoom')
 
+        self.display_name = "Amy's Bedroom"
+
         # Nest specific settings
         self.therm_name  = "Amy's Bedroom Thermostat (Amy's Room)" # Long Name

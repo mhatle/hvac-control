@@ -31,6 +31,8 @@ class LivingRoom(Zone):
 
         self.logger = logging.getLogger('HVAC.Zone.LivingRoom')
 
+        self.display_name = "Living Room"
+
         # ifff action and response retry value (0 = no wait for an activation, assume it worked)
         self.ifttt_cool_on      = ( "livingroom_ac_on", 0 )
         self.ifttt_cool_off     = ( "livingroom_ac_off", 0 )
