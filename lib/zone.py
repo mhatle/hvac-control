@@ -40,6 +40,8 @@ class Zone():
         self.gpio        = gpio
         self.ifttt       = ifttt
 
+        self.display_name = None
+
         self.has_heat    = False  # IFTTT controllable (secondary) heat
         self.has_cool    = False  # IFTTT controllable cooling
         self.has_fan     = False  # IFTTT controllable fan
@@ -83,6 +85,7 @@ class Zone():
 
         # Nest specific settings
         self.therm_id      = None  # ID for this thermostat (set by looking up the name)
+        self.therm_data    = None  # Raw nest thermostat data
         self.therm_name    = None  # Nest name_long
         self.therm_temp    = 0     # Degrees F thermostat is set to (default value)
         self.therm_ambient = None  # Degrees F thermostat has detected
@@ -255,6 +258,7 @@ class Zone():
                 return
 
         thermostat = thermostats[self.therm_id]
+        self.therm_data = thermostat
 
         self.set_nest_has_fan(thermostat['has_fan'])
         self.set_nest_has_cool(thermostat['can_cool'])
@@ -275,16 +279,7 @@ class Zone():
         self.set_nest_mode(thermostat['hvac_mode'])
         self.set_nest_state(thermostat['hvac_state'])
 
-        status = self.therm_mode
-        if status != 'off':
-            if self.therm_state != 'off':
-                status = '%s (%sm) to %s' % (self.therm_state, thermostat['time_to_target'], self.therm_temp)
-            else:
-                status = '%s to %s' % (self.therm_mode, self.therm_temp)
-
-        self.logger.info("%s: %s (current %sF %s%%)" % (self.therm_name, status,
-                 thermostat['ambient_temperature_f'],
-                 thermostat['humidity']))
+        self.getStatus()
 
     def set_nest_has_fan(self, fan):
         if self.has_fan != fan:
@@ -378,8 +373,39 @@ class Zone():
                 elif gpio_lines & self.gpio_fan:    # !0 is off
                     self.turn_off_fan()
 
+            self.getStatus()
+
         finally:
             self.last_gpio = gpio_lines
+
+
+    def getStatus(self):
+        thermostat = self.therm_data
+
+        status = self.therm_mode
+        if status != 'off':
+            if self.therm_state != 'off':
+                if self.heating_on is None and self.ac_cooling is None:
+                    on_state = "unknown"
+                elif self.heating_on or self.ac_cooling:
+                    on_state = "on"
+                else:
+                    on_state = "off"
+
+                status = '%s [%s] (%sm) to %s' % (
+                         self.therm_state,
+                         on_state,
+                         thermostat['time_to_target'],
+                         self.therm_temp )
+            else:
+                status = '%s to %s' % (self.therm_mode, self.therm_temp)
+
+        self.logger.info("%s: %s (current %sF %s%%)" % (
+                 self.display_name or self.therm_name,
+                 status,
+                 thermostat['ambient_temperature_f'],
+                 thermostat['humidity'] ))
+
 
     def run(self):
         self.gpio_mask    = self.gpio_cool | self.gpio_heat | self.gpio_fan
