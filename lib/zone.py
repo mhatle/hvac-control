@@ -125,19 +125,19 @@ class Zone():
 
     def turn_off_heat(self):
         if self.has_heat and self.heat_on != False:
-            self._action(self.ifttt_head_off)
+            self._action(self.ifttt_heat_off)
             self.heat_on = False
 
     def turn_on_heating(self):
-        if self.has_heat and self.heat_on and self.heating != True:
+        if self.has_heat and self.heat_on and self.heating_on != True:
             self._action(self.ifttt_heating_on)
-            self.heating = True
+            self.heating_on = True
             self.set_heat_temp()
 
     def turn_off_heating(self):
-        if self.has_heat and self.heat_on and self.heating != False:
+        if self.has_heat and self.heat_on and self.heating_on != False:
             self._action(self.ifttt_heating_off)
-            self.heating = False
+            self.heating_on = False
             self.set_heat_temp()
 
     def set_heat_temp(self, force=False):
@@ -149,7 +149,7 @@ class Zone():
         if therm_target == 0:
             therm_target = self.heating_default  # reasonable default
 
-        if self.heating:
+        if self.heating_on:
             # There are cases when the nest might call for heating
             # where the set temp is higher then ambient, compensate for this
             if self.therm_ambient and self.therm_ambient > therm_target:
