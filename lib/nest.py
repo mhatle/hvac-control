@@ -191,6 +191,9 @@ class Nest():
                 self.load(data)
                 sleep(wait_time)
 
-        for result in self.REST_Streaming():
-            data = json.loads(result)
-            self.load(data)
+        try:
+            for result in self.REST_Streaming():
+                data = json.loads(result)
+                self.load(data)
+        except Exception as e:
+                self.logger.debug("NEST Exception: %s" % (e))
