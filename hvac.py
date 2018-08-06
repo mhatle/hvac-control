@@ -69,33 +69,79 @@ def main():
     amysroom_obj = amysroom.AmysRoom(nest_obj, gpio_obj, ifttt_obj)
     marksroom_obj = marksroom.MarksRoom(nest_obj, gpio_obj, ifttt_obj)
 
-    gpio_thread = threading.Thread(target=gpio_obj.run)
-    nest_thread = threading.Thread(target=nest_obj.run, args=(True,))
-    ifttt_thread = threading.Thread(target=ifttt_obj.run)
+    gpio_thread = None
+    nest_thread = None
+    ifttt_thread = None
 
-    livingroom_thread = threading.Thread(target=livingroom_obj.run)
-    catroom_thread = threading.Thread(target=catroom_obj.run)
-    amysroom_thread = threading.Thread(target=amysroom_obj.run)
-    marksroom_thread = threading.Thread(target=marksroom_obj.run)
-
-    # Process for ongoing status
-    gpio_thread.daemon = True
-    nest_thread.daemon = True
-    ifttt_thread.daemon = True
-    livingroom_thread.daemon = True
-    catroom_thread.daemon = True
-    amysroom_thread.daemon = True
-    marksroom_thread.daemon = True
-
-    gpio_thread.start()
-    nest_thread.start()
-    ifttt_thread.start()
-    livingroom_thread.start()
-    catroom_thread.start()
-    amysroom_thread.start()
-    marksroom_thread.start()
+    livingroom_thread = None
+    catroom_thread = None
+    amysroom_thread = None
+    marksroom_thread = None
 
     while True:
+        if not gpio_thread or not gpio_thread.isAlive():
+            if gpio_thread:
+                logger.error('GPIO Thread failed, restarting')
+            else:
+                logger.info('Starting GPIO Thread')
+            gpio_thread = threading.Thread(target=gpio_obj.run)
+            gpio_thread.daemon = True
+            gpio_thread.start()
+
+        if not nest_thread or not nest_thread.isAlive():
+            if nest_thread:
+                logger.error('Works with Nest Thread failed, restarting')
+            else:
+                logger.info('Starting Works with Nest Thread')
+            nest_thread = threading.Thread(target=nest_obj.run, args=(True,))
+            nest_thread.daemon = True
+            nest_thread.start()
+
+        if not ifttt_thread or not ifttt_thread.isAlive():
+            if ifttt_thread:
+                logger.error('IFTTT Thread failed, restarting')
+            else:
+                logger.info('Starting IFTTT Thread')
+            ifttt_thread = threading.Thread(target=ifttt_obj.run)
+            ifttt_thread.daemon = True
+            ifttt_thread.start()
+
+        if not livingroom_thread or not livingroom_thread.isAlive():
+            if livingroom_thread:
+                logger.error('livingroom Thread failed, restarting')
+            else:
+                logger.info('Starting livingroom Thread')
+            livingroom_thread = threading.Thread(target=livingroom_obj.run)
+            livingroom_thread.daemon = True
+            livingroom_thread.start()
+
+        if not catroom_thread or not catroom_thread.isAlive():
+            if catroom_thread:
+                logger.error('catroom Thread failed, restarting')
+            else:
+                logger.info('Starting catroom Thread')
+            catroom_thread = threading.Thread(target=catroom_obj.run)
+            catroom_thread.daemon = True
+            catroom_thread.start()
+
+        if not amysroom_thread or not amysroom_thread.isAlive():
+            if amysroom_thread:
+                logger.error('amysroom Thread failed, restarting')
+            else:
+                logger.info('Starting amysroom Thread')
+            amysroom_thread = threading.Thread(target=amysroom_obj.run)
+            amysroom_thread.daemon = True
+            amysroom_thread.start()
+
+        if not marksroom_thread or not marksroom_thread.isAlive():
+            if marksroom_thread:
+                logger.error('marksroom Thread failed, restarting')
+            else:
+                logger.info('Starting marksroom Thread')
+            marksroom_thread = threading.Thread(target=marksroom_obj.run)
+            marksroom_thread.daemon = True
+            marksroom_thread.start()
+
         sleep(60)
 
 if __name__ == '__main__':
