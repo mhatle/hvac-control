@@ -55,4 +55,4 @@ class CatRoom(Zone):
         self.therm_name  = "Living Room Thermostat" # Nest name_long
 
         # GPIO specific settings
-        self.gpio_cool    = 1 << 1
+        self.gpio_cool    = 1 << 3
