@@ -89,23 +89,38 @@ class IFTTT():
         if not os.path.exists(pipe_name):
             raise Exception('no fifo: %s' % pipe_name)
 
+        retry_timer = {}
+
+        fifo = os.open(pipe_name, os.O_RDONLY | os.O_NONBLOCK)
+
         while True:
-            with open(pipe_name, 'r') as fifo:
-                while True:
-                    action = fifo.readline().strip()
-                    if len(action) == 0:
-                        break
+            while True:
+                action = os.read(fifo, 256).strip()
+                if len(action) == 0:
+                    break
 
-                    self.logger.debug("Clear action: %s" % action)
-                    try:
-                        self.lock.acquire()
-                        if action in self.ifttt_actions:
-                            del self.ifttt_actions[action]
-                    finally:
-                        self.lock.release()
+                self.logger.debug("Clear action: %s" % action)
+                try:
+                    self.lock.acquire()
+                    if action in self.ifttt_actions:
+                        del self.ifttt_actions[action]
+                finally:
+                    self.lock.release()
 
-            self.logger.debug("Action list:")
-            for action in self.ifttt_actions:
-                 self.logger.debug(action)
+            if self.ifttt_actions:
+                 self.logger.debug("Action list:")
+                 for action in self.ifttt_actions.copy():
+                     if action not in retry_timer:
+                         retry_timer[action] = self.ifttt_actions[action]
+                         self.logger.debug("%s : scheduling retry ... %s" % (action, retry_timer[action]))
+                     else:
+                         retry_timer[action] = retry_timer[action] - wait_time
+                         self.logger.debug("%s : waiting ... %s" % (action, retry_timer[action]))
+                         if retry_timer[action] <= 0:
+                             self.logger.debug("%s : should retry, but giving up ..." % (action))
+                             del retry_timer[action]
+                             del self.ifttt_actions[action]
+                             #self.logger.debug("Retry %s" % action)
+                             #self.send_action(action, self.ifttt_actions[action])
 
             sleep(wait_time)
