@@ -70,7 +70,7 @@ class Zone():
         self.heating_temp = 0
         self.heating_min  = 0
         self.heating_max  = 100
-        self.heating_default = 70
+        self.heating_default = 65
         self.heating_on_offset  =  2 # When heating raise temp N degrees
         self.heating_off_offset = -2 # When NOT heating drop temp by N degrees
 
@@ -87,9 +87,10 @@ class Zone():
         self.therm_id      = None  # ID for this thermostat (set by looking up the name)
         self.therm_data    = None  # Raw nest thermostat data
         self.therm_name    = None  # Nest name_long
-        self.therm_temp    = 0     # Degrees F thermostat is set to (default value)
+        self.therm_target_low  = 0     # Degrees F thermostat min temp (default value)
+        self.therm_target_high = 0     # Degrees F thermostat max temp (default value)
         self.therm_ambient = None  # Degrees F thermostat has detected
-        self.therm_mode    = None  # Mode thermostat is set to: off, heat, cool
+        self.therm_mode    = None  # Mode thermostat is set to: off, heat, cool, heat-cool, eco
         self.therm_state   = None  # Current state: off, heating, cooling
 
         # GPIO specific settings
@@ -145,7 +146,7 @@ class Zone():
             self.heating_temp = 0
             return
 
-        therm_target = self.therm_temp
+        therm_target = self.therm_target_low
         if therm_target == 0:
             therm_target = self.heating_default  # reasonable default
 
@@ -164,7 +165,7 @@ class Zone():
         if target_temp > self.heating_max:
             target_temp  = self.heading_max
 
-        if force or (target_temp != self.target_temp):
+        if force or (target_temp != self.heating_temp):
             self.heating_temp = target_temp
             self._action(self.ifttt_heating_temp, self.heating_temp)
 
@@ -198,7 +199,7 @@ class Zone():
             self.ac_temp = 0
             return
 
-        therm_target = self.therm_temp
+        therm_target = self.therm_target_high
         if therm_target == 0:
             therm_target = self.ac_temp_default  # reasonable default
 
@@ -265,14 +266,13 @@ class Zone():
         self.set_nest_has_heat(thermostat['can_heat'])
         self.set_nest_ambient(thermostat['ambient_temperature_f'])
 
-        # Note in heat-cool mode the temps are managed differently
-        # not yet implemented...
-    
-        # For now we just track the 'high' temp, which is cooling...
-        if self.therm_mode == "heat-cool" or self.therm_mode == "eco":
-            self.set_nest_temp(thermostat['target_temperature_high_f'])
+        # Directly check the thermostat for mode, since it may be different then last setting
+        if thermostat['hvac_mode'] == "eco":
+            self.set_nest_temp(thermostat['eco_temperature_low_f'], thermostat['eco_temperature_high_f'])
+        elif thermostat['hvac_mode'] == "heat-cool":
+            self.set_nest_temp(thermostat['target_temperature_low_f'], thermostat['target_temperature_high_f'])
         else:
-            self.set_nest_temp(thermostat['target_temperature_f'])
+            self.set_nest_temp(thermostat['target_temperature_f'], thermostat['target_temperature_f'])
 
         # We need to set the mode -after- the temp, so on startup we don't end up sending
         # it twice...
@@ -304,8 +304,10 @@ class Zone():
             elif mode == "cool":
                 self.turn_on_ac()
                 self.turn_off_heat()
-            elif mode == "heat-cool" or mode == "eco":
-                self.logger.warning("eco/heat-cool mode not implemented!")
+            elif mode == "heat-cool":
+                self.turn_on_ac()
+                self.turn_on_heat()
+            elif mode == "eco":
                 self.turn_on_ac()
                 self.turn_on_heat()
             else:
@@ -315,16 +317,27 @@ class Zone():
 
     def set_nest_state(self, mode):
         if self.therm_state != mode:
+            if self.therm_mode == 'heat-cool' or self.therm_mode == 'eco':
+                if mode == 'heating':
+                    self.turn_on_heat()
+                    self.turn_off_ac()
+                if mode == 'cooling':
+                    self.turn_on_ac()
+                    self.turn_off_heat()
+
             self.therm_state = mode
 
     def set_nest_ambient(self, temp):
         self.therm_ambient = temp
  
-    def set_nest_temp(self, temp):
-        if self.therm_temp != temp:
-            self.therm_temp = temp
-            self.set_ac_temp(temp)
-            self.set_heat_temp(temp)
+    def set_nest_temp(self, temp_low, temp_high):
+        if self.therm_target_low != temp_low:
+            self.therm_target_low = temp_low
+            self.set_heat_temp()
+
+        if self.therm_target_high != temp_high:
+            self.therm_target_high = temp_high
+            self.set_ac_temp()
 
     def update_gpio(self, gpio_lines):
         # It may be too early to process this...
@@ -382,23 +395,42 @@ class Zone():
     def getStatus(self):
         thermostat = self.therm_data
 
-        status = self.therm_mode
+        status = self.therm_mode or "heat-cool"
+
         if status != 'off':
+            heat_string = "%sF" % self.therm_target_low
+            cool_string = "%sF" % self.therm_target_high
+            if self.therm_target_low != self.therm_target_high:
+                temp_string = "%sF/%sF" % (self.therm_target_low, self.therm_target_high)
+            else:
+                temp_string = cool_string
+
             if self.therm_state != 'off':
-                if self.heating_on is None and self.ac_cooling is None:
-                    on_state = "unknown"
-                elif self.heating_on or self.ac_cooling:
-                    on_state = "on"
+                if self.therm_state == 'cooling':
+                    if self.ac_cooling is None:
+                        on_state = "unknown"
+                    elif self.ac_cooling:
+                        on_state = "on"
+                        temp_string = cool_string
+                    else:
+                        on_state = "off"
+                elif self.therm_state == 'heating':
+                    if self.heating_on is None or not self.heating_on:
+                        on_state = 'boiler'
+                        temp_string = heat_string
+                    else:
+                        on_state = 'heater'
+                        temp_string = heat_string
                 else:
-                    on_state = "off"
+                    on_state = "unknown mode"
 
                 status = '%s [%s] (%sm) to %s' % (
                          self.therm_state,
                          on_state,
                          thermostat['time_to_target'],
-                         self.therm_temp )
+                         temp_string )
             else:
-                status = '%s to %s' % (self.therm_mode, self.therm_temp)
+                status = '%s to %s' % (status, temp_string)
 
         self.logger.info("%s: %s (current %sF %s%%)" % (
                  self.display_name or self.therm_name,
