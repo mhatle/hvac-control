@@ -40,6 +40,9 @@ class LivingRoom(Zone):
         self.ifttt_cooling_off  = ( "livingroom_ac_eco", 30 )
         self.ifttt_cooling_temp = ( "livingroom_ac_set_%s", 0 )
 
+        self.ifttt_heating_on   = ( "livingroom_heat_on", 0 )
+        self.ifttt_heating_off   = ( "livingroom_heat_off", 0 )
+
         # Current Living Room settings
         # GE (Haier) AEC10AX 10,000BTU 120V
         self.ac_min      = 64
@@ -53,3 +56,4 @@ class LivingRoom(Zone):
 
         # GPIO specific settings
         self.gpio_cool    = 1 << 2
+        self.gpio_heat    = 1 << 6
