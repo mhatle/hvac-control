@@ -50,10 +50,12 @@ Hardware involved:
 
 * Boiler (180F set) & pump - 24 VAC driven
 * 3-Zone Control Valves    - 24 VAC driven
-* 3-Nest Gen 1 thermostats - 24 VAC driven
+* 3-Nest thermostats (2 Gen3, 1 Gen1) - 24 VAC driven
 * Numato 8-port GPIO USB board (GND to GPIO driven)
 * 8-port 24VAC Relay board
-* IFTTT enabled plugs
+* IFTTT enabled plugs (Meross from Amazon)
+  * Baseboard style plug in heater
+  * Ceramic element, fan heater
 * GE (Haier) Window Air Conditioners, IFTTT enabled
 
 
@@ -105,7 +107,7 @@ previously.
 Program theory:
 
 The GPIO, Nest API, and IFTTT work will each be in their own worker threads.
-They are each repsonsible for getting or sending the data, and retrying in
+They are each responsible for getting or sending the data, and retrying in
 case of failures.
 
 A thread for each 'zone' in the house will also be present.  This thread
@@ -116,5 +118,22 @@ that as well.)
 So all of the control algorithms will be local to the zones, and all of the
 data I/O will be local to the workers.
 
-June 19, 2018
+
+Limitations with current design:
+
+The 24VAC to the boiler is the primary heat source (Stage 1).  Stage 2 heating
+is accomplished via the GPIO to the zone.  While the Nest Gen3 supports a
+stage 3 heating, it has not yet been added to the general zone framework.  It
+should be possible to enable a stage 3 though with Zone specific programming.
+
+Cooling is very similar, except there is no central air conditioning.  So all
+cooling control happens via the GPIO configurations.  Similarly, there is only
+a single cooling stage implemented.  In one case, I had a need for a two
+staging cooling and introduced a second 'virtual' Zone for this cooling phase.
+
+The only issue with this design is that cooling and heating for that virtual
+zone come from two different thermostats.  Currently there is no method for
+adjusting the Nest in use for different system modes.
+
+Updated 2018-10-12
 --Mark
