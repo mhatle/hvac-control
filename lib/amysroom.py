@@ -33,5 +33,12 @@ class AmysRoom(Zone):
 
         self.display_name = "Amy's Bedroom"
 
+        # ifttt action and response retry value (0 = no wait for an activation, assume it worked)
+        self.ifttt_heating_on  = ( "amysroom_heat_on", 0 )
+        self.ifttt_heating_off = ( "amysroom_heat_off", 0 )
+
         # Nest specific settings
         self.therm_name  = "Amy's Bedroom Thermostat (Amy's Room)" # Long Name
+
+        # GPIO specific settings
+        self.gpio_heat   = 1 << 0
