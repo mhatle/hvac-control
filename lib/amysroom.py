@@ -38,7 +38,7 @@ class AmysRoom(Zone):
         self.ifttt_heating_off = ( "amysroom_heat_off", 0 )
 
         # Nest specific settings
-        self.therm_name  = "Amy's Bedroom Thermostat (Amy's Room)" # Long Name
+        self.therm_name  = "Amy's Bedroom Thermostat" # Long Name
 
         # GPIO specific settings
         self.gpio_heat   = 1 << 0
