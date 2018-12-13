@@ -43,6 +43,9 @@ class CatRoom(Zone):
         self.ifttt_cooling_off  = ( "catroom_ac_eco", 30 )
         self.ifttt_cooling_temp = ( "catroom_ac_set_%s", 0 )
 
+        self.ifttt_heating_on   = ( "catroom_heat_on", 0 )
+        self.ifttt_heating_off   = ( "catroom_heat_off", 0 )
+
         # Current Living Room settings
         # GE (Haier) AEC10AX 10,000BTU 120V
         self.ac_min      = 64
@@ -52,7 +55,11 @@ class CatRoom(Zone):
         self.ac_cooling_off_offset =  4 # When NOT cooling raise temp by N degrees
 
         # Nest specific settings
+        # Since the room is shared with the living room, we use this
+        # as the basis of which mode we're in.  Note, Amy's room controls
+        # the heat for this room..
         self.therm_name  = "Living Room Thermostat" # Nest name_long
 
         # GPIO specific settings
         self.gpio_cool    = 1 << 3
+        self.gpio_heat    = 1 << 0
