@@ -109,6 +109,7 @@ class Nest():
             if event_type == 'open': # not always received here
                 pass
             elif event_type == 'put':
+                self.logger.debug("Put data received: %s" % event.data)
                 yield event.data
             elif event_type == 'keep-alive':
                 self.logger.debug("No data updates. Receiving an HTTP header to keep the connection alive.")

@@ -130,6 +130,13 @@ class Zone():
             self.heat_on = False
 
     def turn_on_heating(self):
+        # If both heat and A/C are called for, stop both!
+        if self.ac_cooling == True:
+            self.logger.error("Both heating and cooling called for at the same time!")
+            self.turn_off_ac()
+            self.turn_off_heat()
+            return
+
         if self.has_heat and self.heat_on and self.heating_on != True:
             self._action(self.ifttt_heating_on)
             self.heating_on = True
@@ -181,6 +188,13 @@ class Zone():
             self.ac_on = False
 
     def turn_on_cooling(self):
+        # If both heat and A/C are called for, stop both!
+        if self.heating_on == True:
+            self.logger.error("Both heating and cooling called for at the same time!")
+            self.turn_off_ac()
+            self.turn_off_heat()
+            return
+
         if self.has_cool and self.ac_on and self.ac_cooling != True:
             self._action(self.ifttt_cooling_on)
             self.ac_cooling = True
