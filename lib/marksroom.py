@@ -63,8 +63,8 @@ class MarksRoom(Zone):
         self.therm_name  = "Master Bedroom Thermostat (Mark's Bedroom)" # Long Name
 
         # GPIO specific settings
-        self.gpio_cool    = 1 << 4
-        self.gpio_fan     = 1 << 5
+        self.gpio_cool    = 1 << 4 # Cooling stage 1
+        #self.gpio_fan     = 1 << 5 # (not connected)
 
     # At night we want the fan to stay on low, faster the fan the louder it
     # is.  I just wish there was a way to turn off the 'beep' when it changes

@@ -41,4 +41,4 @@ class AmysRoom(Zone):
         self.therm_name  = "Amy's Bedroom Thermostat" # Long Name
 
         # GPIO specific settings
-        self.gpio_heat   = 1 << 0
+        self.gpio_heat   = 1 << 0 # Amy's room stage 2 heat

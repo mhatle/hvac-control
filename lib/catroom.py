@@ -57,9 +57,9 @@ class CatRoom(Zone):
         # Nest specific settings
         # Since the room is shared with the living room, we use this
         # as the basis of which mode we're in.  Note, Amy's room controls
-        # the heat for this room..
+        # the radioator heat for this room, but living room controls plugin heater.
         self.therm_name  = "Living Room Thermostat" # Nest name_long
 
         # GPIO specific settings
-        self.gpio_cool    = 1 << 3
-        self.gpio_heat    = 1 << 0
+        self.gpio_cool    = 1 << 3  # Living room cool stage 2
+        self.gpio_heat    = 1 << 1  # Living room heat stage 3
