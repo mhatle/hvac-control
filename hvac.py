@@ -31,6 +31,7 @@ from lib import gpio
 from lib import ifttt
 from lib import livingroom
 from lib import catroom
+from lib import diningroom
 from lib import marksroom
 from lib import amysroom
 
@@ -66,6 +67,7 @@ def main():
 
     livingroom_obj = livingroom.LivingRoom(nest_obj, gpio_obj, ifttt_obj)
     catroom_obj = catroom.CatRoom(nest_obj, gpio_obj, ifttt_obj)
+    diningroom_obj = diningroom.DiningRoom(nest_obj, gpio_obj, ifttt_obj)
     amysroom_obj = amysroom.AmysRoom(nest_obj, gpio_obj, ifttt_obj)
     marksroom_obj = marksroom.MarksRoom(nest_obj, gpio_obj, ifttt_obj)
 
@@ -75,6 +77,7 @@ def main():
 
     livingroom_thread = None
     catroom_thread = None
+    diningroom_thread = None
     amysroom_thread = None
     marksroom_thread = None
 
@@ -123,6 +126,15 @@ def main():
             catroom_thread = threading.Thread(target=catroom_obj.run)
             catroom_thread.daemon = True
             catroom_thread.start()
+
+        if not diningroom_thread or not diningroom_thread.isAlive():
+            if diningroom_thread:
+                logger.error('diningroom Thread failed, restarting')
+            else:
+                logger.info('Starting diningroom Thread')
+            diningroom_thread = threading.Thread(target=diningroom_obj.run)
+            diningroom_thread.daemon = True
+            diningroom_thread.start()
 
         if not amysroom_thread or not amysroom_thread.isAlive():
             if amysroom_thread:

@@ -1,12 +1,14 @@
 # Individual device configuration: Livingroom
 #
-# This drives the models/algorithms to manages the second stage
-# of the living room.  The room next door, the 'cat room', contains another
-# air conditioner and will be treated as 'stage two' for the living room
-# thermostat.  It only needs to come on if extra cooling is required.
+# This drives the models/algorithms to manages the second stage cooling
+# of the living room, as well as 3rd stage heating.  The room next door,
+# the 'cat room', contains another air conditioner and will be treated as
+# 'stage two' for the living room thermostat.  It only needs to come on if
+# extra cooling is required.  The 3rd stage heating will only come on as
+# needed, which should only be during the coldest part of the year.
 #
 # Written by Mark Hatle <mark@hatle.net>
-# Copyright (C) 2018 Mark Hatle
+# Copyright (C) 2018-2019 Mark Hatle
 #
 # All of the items here are licensed under the GNU General Public License 2.0, unless
 # otherwise noted.  See COPYING for further details.
@@ -57,7 +59,7 @@ class CatRoom(Zone):
         # Nest specific settings
         # Since the room is shared with the living room, we use this
         # as the basis of which mode we're in.  Note, Amy's room controls
-        # the radioator heat for this room, but living room controls plugin heater.
+        # the radiator heat for this room, but living room controls plugin heater.
         self.therm_name  = "Living Room Thermostat" # Nest name_long
 
         # GPIO specific settings
