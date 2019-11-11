@@ -37,8 +37,8 @@ class DiningRoom(Zone):
         self.display_name = "Dining Room"
 
         # ifff action and response retry value (0 = no wait for an activation, assume it worked)
-        self.ifttt_heating_on   = ( "diningroom_heat_on", 0 )
-        self.ifttt_heating_off   = ( "diningroom_heat_off", 0 )
+        self.ifttt_heating_on   = ( "dining_room_heat_on", 0 )
+        self.ifttt_heating_off   = ( "dining_room_heat_off", 0 )
 
         # Nest specific settings
         # Since the room is shared with the living room, we use this
