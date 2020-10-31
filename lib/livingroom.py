@@ -48,7 +48,7 @@ class LivingRoom(Zone):
         self.ac_min      = 64
         self.ac_max      = 86
         self.ac_temp_default = 70  # Default temp if no info from the thermostat
-        self.ac_cooling_on_offset  = -2 # When cooling drop temp by N degrees
+        self.ac_cooling_on_offset  = -10 # When cooling drop temp by N degrees
         self.ac_cooling_off_offset =  2 # When NOT cooling raise temp by N degrees
 
         # Nest specific settings

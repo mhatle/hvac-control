@@ -5,7 +5,7 @@
 # IFTTT service, all to control heating and cooling within the home.
 #
 # Written by Mark Hatle <mark@hatle.net>
-# Copyright (C) 2018-2019 Mark Hatle
+# Copyright (C) 2018-2020 Mark Hatle
 #
 # All of the items here are licensed under the GNU General Public License 2.0, unless
 # otherwise noted.  See COPYING for further details.
@@ -58,7 +58,7 @@ def main():
     logger.addHandler(consolehandle)
 
     logger.info("HVAC Control Software v0.4")
-    logger.info("Copyright (C) 2018-2019 Mark Hatle")
+    logger.info("Copyright (C) 2018-2020 Mark Hatle")
     logger.info("See the source code for licensing terms and conditions.")
 
     gpio_obj = gpio.Gpio(settings.GPIO_SERIAL)

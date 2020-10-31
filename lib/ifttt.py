@@ -4,7 +4,7 @@
 # can be used for status updates via a corresponding cgi-bin/named-pipe.
 #
 # Written by Mark Hatle <mark@hatle.net>
-# Copyright (C) 2018 Mark Hatle
+# Copyright (C) 2018-2020 Mark Hatle
 #
 # All of the items here are licensed under the GNU General Public License 2.0, unless
 # otherwise noted.  See COPYING for further details.
@@ -52,17 +52,25 @@ class IFTTT():
         def _http_request(action):
             while True:
                 try:
+                    #self.logger.info("Trying URL: %s" % (self.ifttt_url % (action)))
                     res = urllib2.urlopen(urllib2.Request(self.ifttt_url % (action)))
                     self.logger.debug("result: %s" % res.read())
+                    self.logger.info("Success: %s" % (action))
                     break
                 except urllib2.HTTPError as e:
                     self.logger.error("HTTP Error: %s: %s" % (e.code, e.reason))
                     self.logger.debug(" Requested: %s" % (self.ifttt_url % (action)))
                     self.logger.debug(" Actual:    %s" % (e.geturl()))
                     sleep(5)
+                    self.logger.info('Retry request %s' % action)
                 except urllib2.URLError as e:
                     self.logger.error('URLError: %s %s' % (self.ifttt_url % (action), e))
                     sleep(5)
+                    self.logger.info('Retry request %s' % action)
+                except urllib2.BadStatusLine as e:
+                    self.logger.error('BadStatusLine: %s %s' % (self.ifttt_url % (action), e))
+                    sleep(5)
+                    self.logger.info('Retry request %s' % action)
 
             return res
 
